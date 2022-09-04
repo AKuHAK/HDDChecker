@@ -25,7 +25,7 @@ jobs:
       - name: Compile HDDChecker
         run: |
           make
-          zip HDDChecker-${{ steps.slug.outputs.sha8 }}.zip HDDChecker.elf lang/*
+          zip HDDChecker-${{ steps.slug.outputs.sha8 }}.zip HDDChecker.elf *.ttf LICENSE_OFL.txt
 
       - name: Upload HDDChecker
         if: ${{ success() }}
@@ -38,10 +38,9 @@ jobs:
         run: |
           make clean
           make fsck-tool
-          cp lang/*.ttf fsck/LANG/
-          cp lang/*.txt fsck/LANG/
+          cp *.ttf fsck/
           cd fsck
-          zip FSCK-tool-${{ steps.slug.outputs.sha8 }}.zip fsck.elf LANG/
+          zip FSCK-tool-${{ steps.slug.outputs.sha8 }}.zip fsck.elf *.ttf
           mv FSCK-tool-${{ steps.slug.outputs.sha8 }}.zip ../
 
       - name: Upload FSCK-tool

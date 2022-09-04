@@ -27,9 +27,9 @@ static void *gFontBuffer = NULL;
 static int gFontBufferSize;
 unsigned short int SelectButton, CancelButton;
 
-#define NUM_SUPPORTED_LANGUAGES 8
+// #define NUM_SUPPORTED_LANGUAGES 8
 
-static int language = LANGUAGE_ENGLISH;
+// static int language = LANGUAGE_ENGLISH;
 
 #include "lang.c"
 
@@ -221,18 +221,19 @@ static char *GetDefaultFontFilePath(void)
     char *result;
 
     if ((result = malloc(sizeof(DefaultFontFilename) + 6 + 2)) != NULL)
-        sprintf(result, "lang/%s", DefaultFontFilename);
+        sprintf(result, "%s", DefaultFontFilename);
 
     return result;
 }
 
-static char *GetFontFilePath(unsigned int language)
+static char *GetFontFilePath(void)
 {
-    char *FontFileArray[NUM_SUPPORTED_LANGUAGES], *result, *pFontFilename;
+    char *result;
+    result = NULL;
+    /* char *FontFileArray[NUM_SUPPORTED_LANGUAGES], *pFontFilename;
     FILE *file;
     int i;
 
-    result = NULL;
     memset(FontFileArray, 0, sizeof(FontFileArray));
 
     while ((file = fopen("lang/fonts.txt", "r")) == NULL) {
@@ -256,13 +257,13 @@ static char *GetFontFilePath(unsigned int language)
                 free(FontFileArray[i]);
 
         fclose(file);
-    } else
-        result = GetDefaultFontFilePath();
+    } else */
+    result = GetDefaultFontFilePath();
 
     return result;
 }
 
-static int LoadLanguageStrings(unsigned int language)
+/* static int LoadLanguageStrings(unsigned int language)
 {
     int result;
     FILE *file;
@@ -300,7 +301,7 @@ static int LoadLanguageStrings(unsigned int language)
         UnloadLanguage();
 
     return result;
-}
+} */
 
 static int LoadDefaultLanguageStrings(void)
 {
@@ -477,10 +478,10 @@ static int InitFont(void)
     int result;
     char *pFontFilePath;
 
-    if ((pFontFilePath = GetFontFilePath(language)) != NULL) {
-        DEBUG_PRINTF("GetFontFilePath(%d): %s\n", language, pFontFilePath);
+    if ((pFontFilePath = GetFontFilePath()) != NULL) {
+        DEBUG_PRINTF("GetFontFilePath(): %s\n", pFontFilePath);
     } else {
-        printf("Can't get font file path from GetFontFilePath(%d).\n", language);
+        printf("Can't get font file path from GetFontFilePath().\n");
         return -1;
     }
 
@@ -504,10 +505,10 @@ static int InitFontWithBuffer(void)
     char *pFontFilePath;
 
     if (gFontBuffer == NULL) {
-        if ((pFontFilePath = GetFontFilePath(language)) != NULL) {
-            DEBUG_PRINTF("GetFontFilePath(%d): %s\n", language, pFontFilePath);
+        if ((pFontFilePath = GetFontFilePath()) != NULL) {
+            DEBUG_PRINTF("GetFontFilePath(): %s\n", pFontFilePath);
         } else {
-            printf("Can't get font file path from GetFontFilePath(%d).\n", language);
+            printf("Can't get font file path from GetFontFilePath().\n");
             return -1;
         }
 
@@ -544,11 +545,11 @@ int InitializeUI(int BufferFont)
     int result;
 
     result = 0;
-    if ((language = configGetLanguage()) >= NUM_SUPPORTED_LANGUAGES)
+    /* if ((language = configGetLanguage()) >= NUM_SUPPORTED_LANGUAGES)
         language = LANGUAGE_ENGLISH;
     memset(LangStringWrapTable, 0, sizeof(LangStringWrapTable));
 
-    DEBUG_PRINTF("InitializeUI: language is: %u\n", language);
+    DEBUG_PRINTF("InitializeUI: language is: %u\n", language); */
 
     if (GetConsoleRegion() == CONSOLE_REGION_JAPAN) {
         SelectButton = PAD_CIRCLE;
@@ -560,18 +561,18 @@ int InitializeUI(int BufferFont)
 
     InitGraphics();
 
-    while ((result = LoadLanguageStrings(language)) == -ENODEV) {
+    /* while ((result = LoadLanguageStrings(language)) == -ENODEV) {
         DEBUG_PRINTF("LoadLanguageStrings(%u): %d\n", language, result);
         WaitForDevice();
     }
 
     DEBUG_PRINTF("LoadLanguageStrings(%u) result: %d\n", language, result);
-    if (result != 0) {
-        if ((result = LoadDefaultLanguageStrings()) != 0) {
-            DEBUG_PRINTF("LoadDefaultLanguageStrings result: %d\n", result);
-            return result;
-        }
+    if (result != 0) */
+    if ((result = LoadDefaultLanguageStrings()) != 0) {
+        DEBUG_PRINTF("LoadDefaultLanguageStrings result: %d\n", result);
+        return result;
     }
+
 
     result = BufferFont ? InitFontWithBuffer() : InitFont();
 
