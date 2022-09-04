@@ -344,7 +344,7 @@ static int CheckFormat(void)
 void MainMenu(void)
 {
 #ifndef FSCK
-    int result;
+    // int result;
     short int option;
     unsigned char done;
     u32 ProcessedSpace;
@@ -455,12 +455,12 @@ void InitProgressScreen(int label)
 
 void DrawDiskSurfScanningScreen(int PercentageComplete, unsigned int SecondsRemaining, unsigned int NumBadSectors)
 {
-    unsigned int HoursRemaining;
-    unsigned char MinutesRemaining;
-
     UISetValue(&ProgressScreen, PRG_SCREEN_ID_PROGRESS, PercentageComplete);
     UISetValue(&ProgressScreen, PRG_SCREEN_ID_RD_ERRS, NumBadSectors);
     if (SecondsRemaining < UINT_MAX) {
+        unsigned int HoursRemaining;
+        unsigned char MinutesRemaining;
+
         if (!ETADisplayed) {
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_HOURS, MITEM_VALUE);
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_MINS, MITEM_VALUE);
@@ -492,11 +492,11 @@ void DrawDiskSurfScanningScreen(int PercentageComplete, unsigned int SecondsRema
 
 void DrawDiskZeroFillingScreen(int PercentageComplete, unsigned int SecondsRemaining)
 {
-    unsigned int HoursRemaining;
-    unsigned char MinutesRemaining;
-
     UISetValue(&ProgressScreen, PRG_SCREEN_ID_PROGRESS, PercentageComplete);
     if (SecondsRemaining < UINT_MAX) {
+        unsigned int HoursRemaining;
+        unsigned char MinutesRemaining;
+
         if (!ETADisplayed) {
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_HOURS, MITEM_VALUE);
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_MINS, MITEM_VALUE);
@@ -528,11 +528,11 @@ void DrawDiskZeroFillingScreen(int PercentageComplete, unsigned int SecondsRemai
 
 void DrawDiskScanningScreen(int PercentageComplete, unsigned int SecondsRemaining)
 {
-    unsigned int HoursRemaining;
-    unsigned char MinutesRemaining;
-
     UISetValue(&ProgressScreen, PRG_SCREEN_ID_PROGRESS, PercentageComplete);
     if (SecondsRemaining < UINT_MAX) {
+        unsigned int HoursRemaining;
+        unsigned char MinutesRemaining;
+
         if (!ETADisplayed) {
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_HOURS, MITEM_VALUE);
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_MINS, MITEM_VALUE);
@@ -564,12 +564,12 @@ void DrawDiskScanningScreen(int PercentageComplete, unsigned int SecondsRemainin
 
 void DrawDiskOptimizationScreen(int PercentageComplete, int TotalPercentageComplete, unsigned int SecondsRemaining)
 {
-    unsigned int HoursRemaining;
-    unsigned char MinutesRemaining;
-
     UISetValue(&ProgressScreen, PRG_SCREEN_ID_PROGRESS, PercentageComplete);
     UISetValue(&ProgressScreen, PRG_SCREEN_ID_TOTAL_PROGRESS, TotalPercentageComplete);
     if (SecondsRemaining < UINT_MAX) {
+        unsigned int HoursRemaining;
+        unsigned char MinutesRemaining;
+
         if (!ETADisplayed) {
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_HOURS, MITEM_VALUE);
             UISetType(&ProgressScreen, PRG_SCREEN_ID_ETA_MINS, MITEM_VALUE);

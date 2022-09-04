@@ -1,12 +1,12 @@
 # PlayStation 2 HDD checker
 
-This is a fork of original project: https://sites.google.com/view/ysai187/home/projects/hddchecker
+This is a fork of the original project: <https://sites.google.com/view/ysai187/home/projects/hddchecker>
 
 ## Introduction
 
 HDDChecker is a basic disk diagnostic tool meant for testing the health of your PlayStation 2 console's Harddisk Drive unit.
 
-It was conceived and constructed because I didn't want to see any more poor SCPH-20400 units being cut open, just to have the disks within them taken out for testing. >_>
+It was conceived and constructed because I didn't want to see anymore poor SCPH-20400 units being cut open, just to have the disks within them taken out for testing. >_>
 
 It'll also be useful for those people who need to check the condition of their HDD units, but don't have a working IDE port on their computers to connect the disk to.
 
@@ -46,7 +46,7 @@ If you experience problems with HDDChecker's scanning and optimization functiona
 - If the disk's S.M.A.R.T. status is indicated to be no good (NG status), the disk is about to fail and should be replaced.
 - This tool may not be able to successfully remap sectors on all drives, as there isn't an official specification on remapping sectors within the ATA specification. If writing to a bad sector isn't sufficient to cause the disk to automatically remap it, the manufacturer's tools may have to be used instead.
 - If a bad sector cannot be remapped, the disk is dying and should be replaced.
-- As zeros will be written to the bad sector in an attempt to cause the disk to remap it, the data stored within the bad sector will be lost. Do not choose to remap the sector if it contains data that cannot be lost.
+- As zeros will be written to the bad sector in an attempt to cause the disk to remap itself, the data stored within the bad sector will be lost. Do not choose to remap the sector if it contains data that cannot be lost.
 
 ## Supported languages
 

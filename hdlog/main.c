@@ -66,10 +66,11 @@ static int hdlog_write(iop_file_t *fd, void *buffer, int size)
 
 static int hdlog_mount(iop_file_t *f, const char *mountpoint, const char *blockdev, int flags, void *arg, int arglen)
 {
-    int result, fd;
+    int result;
 
     if (f->unit < NUM_TTY) {
         if (ttyFds[f->unit] < 0) {
+            int fd;
             printf("HDLOG: mount %s %s %d\n", mountpoint, blockdev, flags);
 
             if ((fd = open(blockdev, flags)) >= 0) {

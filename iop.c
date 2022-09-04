@@ -96,7 +96,6 @@ static void SystemInitThread(struct SystemInitParams *SystemInitParams)
                                    "2\0"
                                    "-n\0"
                                    "12";
-    int i;
 
     SifExecModuleBuffer(ATAD_irx, size_ATAD_irx, 0, NULL, NULL);
     if (SystemInitParams->flags & IOP_MOD_HDD)
@@ -110,6 +109,7 @@ static void SystemInitThread(struct SystemInitParams *SystemInitParams)
 #endif
 
     if (SystemInitParams->flags & IOP_MOD_HDST) {
+        unsigned int i;
         SifExecModuleBuffer(HDST_irx, size_HDST_irx, 0, NULL, NULL);
         for (i = 0; i < NUM_SUPPORTED_DEVICES; i++)
             InitATADevice(i);

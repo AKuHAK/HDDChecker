@@ -103,7 +103,6 @@ static struct hdskBitmap *hdskSimDeleteFixNext(struct hdskBitmap *part)
 static void hdskSimSwapPartition(struct hdskBitmap *start)
 {
     u32 OrigStart, OrigLen;
-    int i;
     struct hdskBitmap *part;
 
     part = hdskBitmap[0].prev;
@@ -115,6 +114,7 @@ static void hdskSimSwapPartition(struct hdskBitmap *start)
                 break;
         } while (part->type != 0);
     } else {
+        unsigned short int i;
         OrigStart = start->start;
         OrigLen   = start->length;
         for (i = 0; i < 2; i++)
@@ -241,10 +241,10 @@ static struct hdskBitmap *hdskBitmapAlloc(void)
 
 static void hdskSimSplitEmptyPartition(struct hdskBitmap *part, u32 length)
 {
-    struct hdskBitmap *end;
-
     printf("hdsk: split empty partition.\n");
     while (part->length != length) {
+        struct hdskBitmap *end;
+
         end = hdskBitmapAlloc();
         part->length /= 2;
         end->start  = part->start + part->length;

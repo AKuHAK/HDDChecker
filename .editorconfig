@@ -16,5 +16,5 @@ indent_style = space
 indent_size = 4
 
 # Tab indentation
-[Makefile*,Rules*]
+[Makefile*, linkfile, Rules*]
 indent_style = tab

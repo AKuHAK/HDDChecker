@@ -40,10 +40,10 @@ u8 IOBuffer[IOBUFFER_SIZE_SECTORS * 512];
 
 static int hdskRemoveTmp(int device)
 {
-    apa_cache_t *clink, *clinkSub;
+    apa_cache_t *clink;
     char partition[APA_IDMAX];
     u32 start;
-    int result, sub;
+    int result;
 
     clink = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &result);
     memset(partition, 0, sizeof(partition));
@@ -59,8 +59,9 @@ static int hdskRemoveTmp(int device)
     }
 
     if (result == 0 && clink != NULL) {
+        int sub = clink->header->nsub;
+
         printf("hdsk: remove _tmp\n");
-        sub                 = clink->header->nsub;
         clink->header->nsub = 0;
 
         clink->flags |= APA_CACHE_FLAG_DIRTY;
@@ -68,6 +69,7 @@ static int hdskRemoveTmp(int device)
         apaCacheFlushAllDirty(device);
 
         for (--sub; sub != -1; sub--) {
+            apa_cache_t *clinkSub;
             if ((clinkSub = apaCacheGetHeader(device, clink->header->subs[sub].start, APA_IO_MODE_READ, &result)) != NULL) {
                 if ((result = apaDelete(clinkSub)) != 0)
                     break;
@@ -408,12 +410,13 @@ static int MovePartition(int device, apa_cache_t *dest, apa_cache_t *start)
 
 static int SplitEmptyPartition(int device, apa_cache_t *partition, u32 length)
 {
-    apa_cache_t *clink, *empty;
+    apa_cache_t *clink;
     int result;
 
     printf("hdsk: split empty partition.\n");
 
     while (partition->header->length != length) {
+        apa_cache_t *empty;
         if ((empty = apaCacheGetHeader(device, partition->header->next, APA_IO_MODE_READ, &result)) != NULL) {
             partition->header->length /= 2;
             clink = apaRemovePartition(device, partition->header->start + partition->header->length, partition->header->next, partition->header->start, partition->header->length);
@@ -545,7 +548,6 @@ struct hdskBitmap hdskBitmap[HDSK_BITMAP_SIZE];
 
 static int hdskBitmapInit(int device)
 {
-    struct hdskBitmap *pBitmap;
     apa_cache_t *clink;
     int result;
 
@@ -556,6 +558,7 @@ static int hdskBitmapInit(int device)
     hdskBitmap[0].prev = hdskBitmap;
 
     for (BitmapUsed = 0; clink != NULL;) {
+        struct hdskBitmap *pBitmap;
         pBitmap         = &hdskBitmap[BitmapUsed + 1];
         pBitmap->start  = clink->header->start;
         pBitmap->length = clink->header->length;
@@ -572,19 +575,20 @@ static int hdskBitmapInit(int device)
 
 static int hdskGetStat(int device, struct hdskStat *buf, apa_device_t *deviceInfo)
 {
-    int result, IsValidPartSize;
-    apa_device_t *pDeviceInfo;
-    struct hdskBitmap *pPartBitmap, *pSelEmptyPartBM;
+    int result;
     u32 PartSize;
 
     TotalCopied = 0;
 
     PartSize = HDSK_MIN_PART_SIZE;
     if ((result = hdskBitmapInit(device)) == 0) {
+        apa_device_t *pDeviceInfo;
+        struct hdskBitmap *pSelEmptyPartBM;
         hdskSimGetFreeSectors(device, buf, deviceInfo);
 
         for (pDeviceInfo = &deviceInfo[device]; PartSize < pDeviceInfo->partitionMaxSize; PartSize *= 2) {
-            IsValidPartSize = HDSK_MIN_PART_SIZE < PartSize;
+            struct hdskBitmap *pPartBitmap;
+            int IsValidPartSize = HDSK_MIN_PART_SIZE < PartSize;
 
             while ((pPartBitmap = hdskSimFindEmptyPartition(PartSize)) != NULL) {
                 if (((pSelEmptyPartBM = hdskSimFindLastUsedPartition(PartSize, pPartBitmap->start, 1)) == NULL) &&

@@ -32,10 +32,10 @@ extern int InstallLockSema;
 int GetBootDeviceID(void)
 {
     static int BootDevice = -2;
-    char path[256];
     int result;
 
     if (BootDevice < BOOT_DEVICE_UNKNOWN) {
+        char path[256];
         getcwd(path, sizeof(path));
 
         if (!strncmp(path, "hdd:", 4) || !strncmp(path, "hdd0:", 5))
@@ -62,15 +62,15 @@ static int SysInitMount(void)
 {
     static char BlockDevice[38] = "";
     char command[256];
-    const char *MountPath;
-    int BlockDeviceNameLen, result;
+    int result;
 
     if (BlockDevice[0] == '\0') {
+        const char *MountPath;
         // Format: hdd0:partition:pfs:/path_to_file_on_partition
         // However, getcwd will return the path, without the filename (as parsed by libc's init.c).
         getcwd(command, sizeof(command));
         if (strlen(command) > 6 && (MountPath = strchr(&command[5], ':')) != NULL) {
-            BlockDeviceNameLen = (unsigned int)MountPath - (unsigned int)command;
+            int BlockDeviceNameLen = (unsigned int)MountPath - (unsigned int)command;
             strncpy(BlockDevice, command, BlockDeviceNameLen);
             BlockDevice[BlockDeviceNameLen] = '\0';
 
@@ -108,9 +108,9 @@ int SysBootDeviceInit(void)
 int GetConsoleRegion(void)
 {
     static int region = -1;
-    FILE *file;
 
     if (region < 0) {
+        FILE *file;
         if ((file = fopen("rom0:ROMVER", "r")) != NULL) {
             fseek(file, 4, SEEK_SET);
             switch (fgetc(file)) {
@@ -149,10 +149,10 @@ int GetConsoleVMode(void)
 int IsPSX(void)
 {
     static int psx = -1;
-    FILE *file;
     int result;
 
     if ((result = psx) < 0) {
+        FILE *file;
         if ((file = fopen("rom0:PSXVER", "r")) != NULL) {
             psx = 1;
             fclose(file);
@@ -233,7 +233,7 @@ int ScanDisk(int unit)
 {
     char ErrorPartName[64] = "hdd0:";
 
-    int result, InitSemaID;
+    int result = 0;
 
     WaitSema(InstallLockSema);
 
@@ -250,7 +250,7 @@ int ScanDisk(int unit)
                 DisplayErrorMessage(SYS_UI_MSG_HDD_FAULT);
 
             DisplayFlashStatusUpdate(SYS_UI_MSG_PLEASE_WAIT);
-            InitSemaID = IopInitStart(IOP_MODSET_SA_MAIN);
+            int InitSemaID = IopInitStart(IOP_MODSET_SA_MAIN);
             WaitSema(InitSemaID);
             DeleteSema(InitSemaID);
         } else
@@ -298,12 +298,11 @@ static int HdckDisk(int unit)
 
 static int FsckDisk(int unit)
 {
-    char bdevice[] = "hdd0:", cmd[64];
+    char bdevice[] = "hdd0:";
     iox_dirent_t dirent;
     struct fsckStatus status;
-    unsigned int PadStatus, CurrentCPUTicks, PreviousCPUTicks, seconds, TimeElasped, rate, partitions, i;
-    int PercentageComplete;
-    int bfd, fd, result, InitSemaID;
+    unsigned int partitions;
+    int bfd, result, InitSemaID;
 
     DisplayFlashStatusUpdate(SYS_UI_MSG_PLEASE_WAIT);
 
@@ -340,28 +339,32 @@ static int FsckDisk(int unit)
 
     // Now, scan the disk.
     if ((bfd = fileXioDopen(bdevice)) >= 0) {
+        unsigned int i;
         for (i = 0; fileXioDread(bfd, &dirent) > 0; i++) {
             if (!(dirent.stat.attr & APA_FLAG_SUB) && dirent.stat.mode == APA_TYPE_PFS) {
+                char cmd[64];
+                int fd;
                 printf("# fsck hdd%d:%s\n", unit, dirent.name);
 
                 sprintf(cmd, "fsck:hdd%d:%s", unit, dirent.name);
                 if ((fd = fileXioOpen(cmd, 0, FSCK_MODE_VERBOSITY(FSCK_VERBOSITY) | FSCK_MODE_AUTO | FSCK_MODE_WRITE)) >= 0) {
                     if ((result = fileXioIoctl2(fd, FSCK_IOCTL2_CMD_START, NULL, 0, NULL, 0)) == 0) {
-                        result           = 0;
-                        TimeElasped      = 0;
-                        PreviousCPUTicks = cpu_ticks();
+                        result                        = 0;
+                        unsigned int TimeElasped      = 0;
+                        unsigned int PreviousCPUTicks = cpu_ticks();
                         while (fileXioIoctl2(fd, FSCK_IOCTL2_CMD_POLL, NULL, 0, NULL, 0) == 1) {
-                            CurrentCPUTicks = cpu_ticks();
+                            unsigned int CurrentCPUTicks = cpu_ticks();
+                            unsigned int seconds;
                             if ((seconds = (CurrentCPUTicks > PreviousCPUTicks ? CurrentCPUTicks - PreviousCPUTicks : UINT_MAX - PreviousCPUTicks + CurrentCPUTicks) / 295000000) > 0) {
                                 TimeElasped += seconds;
                                 PreviousCPUTicks = CurrentCPUTicks;
                             }
-                            PercentageComplete = (int)((u64)i * 100 / partitions);
-                            rate               = (TimeElasped > 0) ? i / TimeElasped : 0; // In partitions/second
+                            int PercentageComplete = (int)((u64)i * 100 / partitions);
+                            unsigned int rate      = (TimeElasped > 0) ? i / TimeElasped : 0; // In partitions/second
 
                             DrawDiskScanningScreen(PercentageComplete, rate > 0 ? (partitions - i) / rate : UINT_MAX);
 
-                            PadStatus = ReadCombinedPadStatus();
+                            unsigned int PadStatus = ReadCombinedPadStatus();
                             if (PadStatus & CancelButton) {
                                 if (DisplayPromptMessage(SYS_UI_MSG_SCAN_DISK_ABORT_CFM, SYS_UI_LBL_NO, SYS_UI_LBL_YES) == 2) {
                                     fileXioIoctl2(fd, FSCK_IOCTL2_CMD_STOP, NULL, 0, NULL, 0);
@@ -440,8 +443,6 @@ static int HdskDisk(int unit)
 {
     char bdevice[] = "hdsk0:";
     struct hdskStat status;
-    unsigned int PadStatus, CurrentCPUTicks, PreviousCPUTicks, seconds, TimeElasped, rate;
-    int PercentageComplete;
     int result, InitSemaID;
     u32 progress;
 
@@ -468,23 +469,24 @@ static int HdskDisk(int unit)
         printf("# hdsk: total: %x, free: %x\n", status.total, status.free);
 
         if ((status.total > 0) && (result = fileXioDevctl(bdevice, HDSK_DEVCTL_START, NULL, 0, NULL, 0)) == 0) {
-            result           = 0;
-            TimeElasped      = 0;
-            PreviousCPUTicks = cpu_ticks();
+            result                        = 0;
+            unsigned int TimeElasped      = 0;
+            unsigned int PreviousCPUTicks = cpu_ticks();
             while (fileXioDevctl(bdevice, HDSK_DEVCTL_POLL, NULL, 0, NULL, 0) == 1) {
-                progress           = (u32)fileXioDevctl(bdevice, HDSK_DEVCTL_GET_PROGRESS, NULL, 0, NULL, 0);
-                PercentageComplete = (int)((u64)progress * 100 / status.total);
+                progress               = (u32)fileXioDevctl(bdevice, HDSK_DEVCTL_GET_PROGRESS, NULL, 0, NULL, 0);
+                int PercentageComplete = (int)((u64)progress * 100 / status.total);
 
-                CurrentCPUTicks = cpu_ticks();
+                unsigned int CurrentCPUTicks = cpu_ticks();
+                unsigned int seconds;
                 if ((seconds = (CurrentCPUTicks > PreviousCPUTicks ? CurrentCPUTicks - PreviousCPUTicks : UINT_MAX - PreviousCPUTicks + CurrentCPUTicks) / 295000000) > 0) {
                     TimeElasped += seconds;
                     PreviousCPUTicks = CurrentCPUTicks;
                 }
-                rate = (TimeElasped > 0) ? progress / TimeElasped : 0; // In sectors/second
+                unsigned int rate = (TimeElasped > 0) ? progress / TimeElasped : 0; // In sectors/second
 
                 DrawDiskOptimizationScreen(PercentageComplete, 50 + PercentageComplete / 2, rate > 0 ? (status.total - progress) / rate : UINT_MAX);
 
-                PadStatus = ReadCombinedPadStatus();
+                unsigned int PadStatus = ReadCombinedPadStatus();
                 if (PadStatus & CancelButton) {
                     if (DisplayPromptMessage(SYS_UI_MSG_OPT_DISK_ABORT_CFM, SYS_UI_LBL_NO, SYS_UI_LBL_YES) == 2) {
                         fileXioDevctl(bdevice, HDSK_DEVCTL_STOP, NULL, 0, NULL, 0);
@@ -509,12 +511,11 @@ static int HdskDisk(int unit)
 
 static int FsskDisk(int unit)
 {
-    char bdevice[] = "hdd0:", cmd[64];
+    char bdevice[] = "hdd0:";
     iox_dirent_t dirent;
     struct fsskStatus status;
-    unsigned int PadStatus, CurrentCPUTicks, PreviousCPUTicks, seconds, TimeElasped, rate, partitions, i;
-    int PercentageComplete;
-    int bfd, fd, result, InitSemaID;
+    unsigned int partitions;
+    int bfd, result, InitSemaID;
 
     InitSemaID = IopInitStart(IOP_MODSET_FSSK);
     bdevice[3] = '0' + unit;
@@ -549,28 +550,32 @@ static int FsskDisk(int unit)
 
     // Now, scan the disk.
     if ((bfd = fileXioDopen(bdevice)) >= 0) {
+        int i;
         for (i = 0; fileXioDread(bfd, &dirent) > 0; i++) {
             if (!(dirent.stat.attr & APA_FLAG_SUB) && dirent.stat.mode == APA_TYPE_PFS) {
+                char cmd[64];
+                int fd;
                 printf("# fssk hdd%d:%s\n", unit, dirent.name);
 
                 sprintf(cmd, "fssk:hdd%d:%s", unit, dirent.name);
                 if ((fd = fileXioOpen(cmd, 0, FSSK_MODE_VERBOSITY(FSSK_VERBOSITY))) >= 0) {
                     if ((result = fileXioIoctl2(fd, FSSK_IOCTL2_CMD_START, NULL, 0, NULL, 0)) == 0) {
-                        result           = 0;
-                        TimeElasped      = 0;
-                        PreviousCPUTicks = cpu_ticks();
+                        result                        = 0;
+                        unsigned int TimeElasped      = 0;
+                        unsigned int PreviousCPUTicks = cpu_ticks();
                         while (fileXioIoctl2(fd, FSSK_IOCTL2_CMD_POLL, NULL, 0, NULL, 0) == 1) {
-                            CurrentCPUTicks = cpu_ticks();
+                            unsigned int CurrentCPUTicks = cpu_ticks();
+                            unsigned int seconds;
                             if ((seconds = (CurrentCPUTicks > PreviousCPUTicks ? CurrentCPUTicks - PreviousCPUTicks : UINT_MAX - PreviousCPUTicks + CurrentCPUTicks) / 295000000) > 0) {
                                 TimeElasped += seconds;
                                 PreviousCPUTicks = CurrentCPUTicks;
                             }
-                            PercentageComplete = (int)((u64)i * 100 / partitions);
-                            rate               = (TimeElasped > 0) ? i / TimeElasped : 0; // In partitions/second
+                            int PercentageComplete = (int)((u64)i * 100 / partitions);
+                            unsigned int rate      = (TimeElasped > 0) ? i / TimeElasped : 0; // In partitions/second
 
                             DrawDiskOptimizationScreen(PercentageComplete, PercentageComplete / 2, rate > 0 ? (partitions - i) / rate : UINT_MAX);
 
-                            PadStatus = ReadCombinedPadStatus();
+                            unsigned int PadStatus = ReadCombinedPadStatus();
                             if (PadStatus & CancelButton) {
                                 if (DisplayPromptMessage(SYS_UI_MSG_OPT_DISK_ABORT_CFM, SYS_UI_LBL_NO, SYS_UI_LBL_YES) == 2) {
                                     fileXioIoctl2(fd, FSSK_IOCTL2_CMD_STOP, NULL, 0, NULL, 0);
@@ -650,7 +655,7 @@ int SurfScanDisk(int unit)
 
     InitProgressScreen(SYS_UI_LBL_SURF_SCANNING_DISK);
 
-    sprintf(DeviceName, "hdst%u:", unit);
+    sprintf(DeviceName, "hdst%d:", unit);
     result                = 0;
     TotalSectors          = GetATADeviceCapacity(unit);
     TimeElasped           = 0;
@@ -756,13 +761,12 @@ int ZeroFillDisk(int unit)
     char DeviceName[8];
     int result, InitSemaID;
     HdstSectorIOParams_t SectorIOParams;
-    int PercentageComplete;
 
     WaitSema(InstallLockSema);
 
     InitProgressScreen(SYS_UI_LBL_ZERO_FILLING_DISK);
 
-    sprintf(DeviceName, "hdst%u:", unit);
+    sprintf(DeviceName, "hdst%d:", unit);
     result           = 0;
     TotalSectors     = GetATADeviceCapacity(unit);
     TimeElasped      = 0;
@@ -773,8 +777,8 @@ int ZeroFillDisk(int unit)
             TimeElasped += seconds;
             PreviousCPUTicks = CurrentCPUTicks;
         }
-        PercentageComplete = (int)((u64)lba * 100 / TotalSectors);
-        rate               = (TimeElasped > 0) ? (TotalSectors - SectorsRemaining) / TimeElasped : 0; // In sectors/second
+        int PercentageComplete = (int)((u64)lba * 100 / TotalSectors);
+        rate                   = (TimeElasped > 0) ? (TotalSectors - SectorsRemaining) / TimeElasped : 0; // In sectors/second
 
         DrawDiskZeroFillingScreen(PercentageComplete, (rate > 0 ? SectorsRemaining / rate : UINT_MAX));
         PadStatus = ReadCombinedPadStatus();

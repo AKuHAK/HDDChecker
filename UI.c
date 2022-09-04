@@ -54,12 +54,12 @@ static void WaitForDevice(void)
 static int FormatLanguageString(const char *in, int len, char *out)
 {
     wchar_t wchar1, wchar2;
-    int ActualLength, CharLen1, CharLen2;
+    int ActualLength, CharLen1;
 
     ActualLength = 0;
     CharLen1     = mbtowc(&wchar1, in, len);
     while (CharLen1 > 0 && wchar1 != '\0') {
-        CharLen2 = mbtowc(&wchar2, in + CharLen1, len - CharLen1);
+        int CharLen2 = mbtowc(&wchar2, in + CharLen1, len - CharLen1);
         if ((CharLen2 > 0) && (wchar1 == '\\' && wchar2 != '\0')) {
             switch (wchar2) { // When a translation file is used, escape characters appear like "\n" in the file.
                 case 'n':
@@ -141,7 +141,7 @@ static void BreakLongLanguageString(char *str)
 
 static int ParseLanguageFile(char **array, FILE *file, unsigned int ExpectedNumLines)
 {
-    int result, LinesLoaded, len;
+    int result, LinesLoaded;
     unsigned char BOMTemp[3];
     char line[512];
 
@@ -151,7 +151,7 @@ static int ParseLanguageFile(char **array, FILE *file, unsigned int ExpectedNumL
 
     result = 0;
     for (LinesLoaded = 0; fgets(line, sizeof(line), file) != NULL; LinesLoaded++) {
-        len = strlen(line);
+        int len = strlen(line);
 
         if (len >= 1 && line[len - 1] == '\n') // Remove the newline character, if it exists.
         {
@@ -170,7 +170,7 @@ static int ParseLanguageFile(char **array, FILE *file, unsigned int ExpectedNumL
 
     if (result == 0) {
         if (LinesLoaded != ExpectedNumLines) {
-            printf("ParseLanguageFile: Mismatched number of lines (%u/%d)\n", LinesLoaded, ExpectedNumLines);
+            printf("ParseLanguageFile: Mismatched number of lines (%d/%u)\n", LinesLoaded, ExpectedNumLines);
             result = -1;
         }
     }
@@ -180,12 +180,12 @@ static int ParseLanguageFile(char **array, FILE *file, unsigned int ExpectedNumL
 
 static int ParseFontListFile(char **array, FILE *file, unsigned int ExpectedNumLines)
 {
-    int result, LinesLoaded, len;
+    int result, LinesLoaded;
     char line[256];
 
     result = 0;
     for (LinesLoaded = 0; fgets(line, sizeof(line), file) != NULL; LinesLoaded++) {
-        len = strlen(line);
+        int len = strlen(line);
 
         if (len >= 1 && line[len - 1] == '\n') // Remove the newline character, if it exists.
         {
@@ -206,7 +206,7 @@ static int ParseFontListFile(char **array, FILE *file, unsigned int ExpectedNumL
 
     if (result == 0) {
         if (LinesLoaded != ExpectedNumLines) {
-            printf("ParseFontListFile: Mismatched number of lines (%u/%d)\n", LinesLoaded, ExpectedNumLines);
+            printf("ParseFontListFile: Mismatched number of lines (%d/%u)\n", LinesLoaded, ExpectedNumLines);
             result = -1;
         }
     }
@@ -444,12 +444,12 @@ static void InitGraphics(void)
 static int LoadFontIntoBuffer(struct UIDrawGlobal *gsGlobal, const char *path)
 {
     FILE *file;
-    int result, size;
+    int result;
     void *buffer;
 
     if ((file = fopen(path, "rb")) != NULL) {
         fseek(file, 0, SEEK_END);
-        size = ftell(file);
+        int size = ftell(file);
         rewind(file);
 
         if ((buffer = memalign(64, size)) != NULL) {
@@ -502,9 +502,9 @@ static int InitFont(void)
 static int InitFontWithBuffer(void)
 {
     int result;
-    char *pFontFilePath;
 
     if (gFontBuffer == NULL) {
+        char *pFontFilePath;
         if ((pFontFilePath = GetFontFilePath()) != NULL) {
             DEBUG_PRINTF("GetFontFilePath(): %s\n", pFontFilePath);
         } else {

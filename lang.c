@@ -1,3 +1,4 @@
+#include "lang.h"
 #ifdef FSCK
 
 static const char *DefaultLanguageStringTable[SYS_UI_MSG_COUNT] = {

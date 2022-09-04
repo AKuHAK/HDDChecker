@@ -210,6 +210,7 @@ static int hdst_devctl(iop_file_t *fd, const char *path, int cmd, void *arg, uns
                 break;
             case HDST_DEVCTL_DEVICE_FLUSH_CACHE:
                 result = ata_device_flush_cache(fd->unit);
+                break;
             case HDST_DEVCTL_SET_IO_BUFFER_SIZE:
                 result = SetIOBufferSize(*(int *)arg);
                 break;

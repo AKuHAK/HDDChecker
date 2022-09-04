@@ -38,10 +38,9 @@ static void DeinitServices(void)
 
 int main(int argc, char *argv[])
 {
-    unsigned char PadStatus, done;
-    unsigned int FrameNum;
+    // unsigned char result, PadStatus, done;
     ee_sema_t ThreadSema;
-    int result, InitSemaID, BootDevice;
+    int InitSemaID, BootDevice;
 
     chdir("mass:/HDDChecker/");
     // chdir("hdd0:__system:pfs:/HDDChecker/");
@@ -69,6 +68,7 @@ int main(int argc, char *argv[])
     EnableIntc(kINTC_VBLANK_START);
 
     if (BootDevice != BOOT_DEVICE_HDD) {
+        unsigned int FrameNum = 0;
         if (SysBootDeviceInit() != 0) {
             WaitSema(InitSemaID);
             DeinitServices();
@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
             Exit(-1);
         }
 
-        FrameNum = 0;
         /* Draw something nice here while waiting... */
         do {
             RedrawLoadingScreen(FrameNum);

@@ -133,9 +133,9 @@ static u16 fsskCalcLastSub(pfs_mount_t *mount)
 static int fsskCopyBlock(pfs_mount_t *mount, pfs_blockinfo_t *block1, pfs_blockinfo_t *block2, u32 length)
 {
     u32 i;
-    int result;
 
     for (i = 0; i < length; i++) {
+        int result = 0;
         if ((result = mount->blockDev->transfer(mount->fd, IOBuffer, block2->subpart, (block2->number + i) << mount->sector_scale, 1 << mount->sector_scale, PFS_IO_MODE_READ)) < 0 || ((result = mount->blockDev->transfer(mount->fd, IOBuffer, block1->subpart, (block1->number + i) << mount->sector_scale, 1 << mount->sector_scale, PFS_IO_MODE_WRITE)) < 0))
             return result;
     }
@@ -217,7 +217,7 @@ static int fsskMoveInode(pfs_mount_t *mount, pfs_cache_t *dest, pfs_cache_t *sta
 {
     pfs_cache_t *clink, *clink2, *clink3;
     pfs_blockinfo_t block, block2;
-    int result, i, value;
+    int result;
 
     printf("\t========== Move");
     if (FIO_S_ISDIR(start->u.inode->mode)) {
@@ -230,6 +230,8 @@ static int fsskMoveInode(pfs_mount_t *mount, pfs_cache_t *dest, pfs_cache_t *sta
     if ((result = fsckBitmapSearchFreeZoneSpecial(mount, &block, start->u.inode->number_blocks, fsskRuntimeData.status.partsDeleted)) >= 0) {
         if ((result = fsskCopyBlock(mount, &block, &start->u.inode->inode_block, 1)) >= 0 &&
             (clink = pfsCacheGetData(mount, block.subpart, block.number << mount->inode_scale, PFS_CACHE_FLAG_SEGD | PFS_CACHE_FLAG_NOLOAD, &result)) != NULL) {
+            int i;
+
             memcpy(clink->u.inode, start->u.inode, sizeof(pfs_inode_t));
             memcpy(&clink->u.inode->inode_block, &block, sizeof(pfs_blockinfo_t));
             memcpy(&clink->u.inode->last_segment, &block, sizeof(pfs_blockinfo_t));
@@ -247,6 +249,7 @@ static int fsskMoveInode(pfs_mount_t *mount, pfs_cache_t *dest, pfs_cache_t *sta
                 } else {
                     memcpy(&block2, &clink2->u.inode->data[pfsFixIndex(i)], sizeof(pfs_blockinfo_t));
                     if (pfsFixIndex(clink->u.inode->number_data - 1) != 0) {
+                        int value;
                         if ((value = pfsBitmapAllocateAdditionalZones(mount, clink3->u.inode->data, block2.count)) != 0) {
                             block.subpart = clink3->u.inode->data[0].subpart;
                             block.number  = clink3->u.inode->data[0].number + clink3->u.inode->data[0].count;
@@ -584,11 +587,12 @@ static int FsskClose(iop_file_t *fd)
 
 static int fsskSimGetStat(pfs_mount_t *mount)
 {
-    int result, i;
+    int result;
 
     fsskRuntimeData.status.partsDeleted = fsskCalculateSpaceToRemove(mount);
     result                              = 0;
     if (mount->num_subs - fsskRuntimeData.status.partsDeleted < mount->num_subs) {
+        int i;
         for (i = mount->num_subs; i != 0; i--)
             result += mount->blockDev->getSize(mount->fd, i);
     }

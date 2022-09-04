@@ -379,7 +379,7 @@ static void MarkUnreadablePartionAsEmpty(int device, u32 lba, u32 parent, u32 le
 {
     apa_cache_t *clink;
     u32 new_length;
-    int result, i;
+    int result;
 
     new_length = 0;
     clink      = apaCacheGetHeader(device, parent, 0, &result);
@@ -387,6 +387,7 @@ static void MarkUnreadablePartionAsEmpty(int device, u32 lba, u32 parent, u32 le
 
     if (clink != NULL) {
         while (length != 0) {
+            int i;
             for (i = 31; i >= 0; i--) {
                 if ((new_length = 1 << i) & length)
                     break;
@@ -470,12 +471,13 @@ static int ReadPartitionMap(int device, apa_cache_t *clink, int *pMainCount, int
 // Goes through the partitions and checks the relationships between the main and sub-partitions.
 static int CheckPartitions(int device, apa_cache_t *clink)
 {
-    int result, MainCount, SubCount, i, sub, count, flag, missing_sub_found;
-    apa_cache_t *clink2, *clink_sub;
-    apa_sub_t *pSubs;
-    u32 *ptr;
+    int result, MainCount, SubCount;
+    apa_cache_t *clink2;
 
     if ((result = ReadPartitionMap(device, clink, &MainCount, &SubCount)) == 0) {
+        apa_sub_t *pSubs;
+        apa_cache_t *clink_sub;
+        int i, sub, count, flag, missing_sub_found;
         printf("hdck: check main partitions.\n");
 
         for (i = 0; i < MainCount && result == 0; i++) {
@@ -516,6 +518,7 @@ static int CheckPartitions(int device, apa_cache_t *clink)
 
         if (result >= 0) {
             if ((result = ReadPartitionMap(device, clink, &MainCount, &SubCount)) == 0) {
+                u32 *ptr;
                 printf("hdck: check sub partitions.\n");
 
                 for (sub = 0, ptr = (u32 *)IOBuffer2; sub < SubCount && result == 0; ptr++, sub++) {

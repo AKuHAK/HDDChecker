@@ -71,7 +71,6 @@ const char *fsckGetChar(void)
 static int fsckPromptUserAction(const char *description, int mode)
 {
     int result;
-    unsigned char choice;
 
     fsckRuntimeData.status.errorCount++;
 
@@ -85,6 +84,7 @@ static int fsckPromptUserAction(const char *description, int mode)
 
             result = mode;
         } else {
+            unsigned char choice;
             printf("%s (%s)? ", description, mode == 0 ? "n/y" : "y/n");
             do {
                 choice = *fsckGetChar();
@@ -111,7 +111,6 @@ static int fsckPromptUserAction(const char *description, int mode)
 static int fsckPromptUserAction2(const char *description, int mode)
 {
     int result;
-    unsigned char choice;
 
     if (fsckWriteEnabled != 0) {
         if (fsckAutoMode != 0) {
@@ -121,6 +120,7 @@ static int fsckPromptUserAction2(const char *description, int mode)
 
             result = mode;
         } else {
+            unsigned char choice;
             printf("%s (%s)? ", description, mode == 0 ? "n/y" : "y/n");
             do {
                 choice = *fsckGetChar();
@@ -224,12 +224,12 @@ static void pfsPrintPWD(void)
 static int pfsInitDirEnt(pfs_mount_t *mount, u16 subpart, u32 inodeNumber, u32 number, int isDir)
 {
     pfs_cache_t *clink;
-    pfs_dentry_t *pDentry;
     int result;
 
     result = -EIO;
     if (fsckPromptUserAction(" initialize directory entry", 1) != 0) {
         if ((clink = pfsCacheGetData(mount, subpart, number, PFS_CACHE_FLAG_NOLOAD, &result)) != NULL) {
+            pfs_dentry_t *pDentry;
             memset(clink->u.dentry, 0, pfsMetaSize);
             pDentry = clink->u.dentry;
 
@@ -881,7 +881,6 @@ static int fsckCheckBitmap(pfs_mount_t *mount, void *buffer)
 static int CheckSuperBlock(pfs_mount_t *pMainPFSMount)
 {
     int result, i;
-    u32 *pFreeZones;
     pfs_super_block_t *super = (pfs_super_block_t *)IOBuffer;
 
     pMainPFSMount->num_subs = pMainPFSMount->blockDev->getSubNumber(pMainPFSMount->fd);
@@ -966,6 +965,7 @@ static int CheckSuperBlock(pfs_mount_t *pMainPFSMount)
 
     // 0x00001c80
     if ((result = fsckCheckBitmap(pMainPFSMount, IOBuffer)) >= 0) {
+        u32 *pFreeZones;
         if (fsckVerbosityLevel > 0)
             printf("fsck: \tdone.\n");
 
@@ -984,7 +984,7 @@ static int CheckSuperBlock(pfs_mount_t *pMainPFSMount)
 // 0x00002224
 static int FsckOpen(iop_file_t *fd, const char *name, int flags, int mode)
 {
-    int blockfd, result, i;
+    int blockfd, result;
     u32 count;
     iox_stat_t StatData;
     pfs_block_device_t *pblockDevData;
@@ -1031,6 +1031,7 @@ static int FsckOpen(iop_file_t *fd, const char *name, int flags, int mode)
         printf("fsck: done.\n");
 
     if ((result = pfsBitmapPartInit(MainPFSMount.total_zones)) >= 0) {
+        int i;
         // 0x000023bc
         memset(&fsckRuntimeData, 0, sizeof(fsckRuntimeData));
 

@@ -109,8 +109,6 @@ static Font_t GS_sub_FTFont;
 
 static int ResetThisFont(struct UIDrawGlobal *gsGlobal, Font_t *font)
 {
-    struct FontAtlas *atlas;
-    unsigned short int i;
     int result, vram;
 
     result = 0;
@@ -124,12 +122,14 @@ static int ResetThisFont(struct UIDrawGlobal *gsGlobal, Font_t *font)
     vram = GsVramAllocTextureBuffer(font->Clut.width, font->Clut.height, font->Clut.psm);
 
     if (vram >= 0) {
+        struct FontAtlas *atlas;
         font->Clut.vram_addr = (u16)vram;
 
         UploadClut(gsGlobal, &font->Clut, font->ClutMem);
 
         font->Texture.x = 0;
         font->Texture.y = 0;
+        unsigned short int i;
         for (i = 0, atlas = font->atlas; i < FNT_MAX_ATLASES; i++, atlas++) {
             atlas->frontier[0].width  = 0;
             atlas->frontier[0].height = 0;
@@ -161,15 +161,15 @@ int FontReset(struct UIDrawGlobal *gsGlobal)
     if ((result = ResetThisFont(gsGlobal, &GS_FTFont)) == 0)
         result = ResetThisFont(gsGlobal, &GS_sub_FTFont);
 
-    return 0;
+    return result;
 }
 
 static int InitFontSupportCommon(struct UIDrawGlobal *gsGlobal, Font_t *font)
 {
     int result;
-    unsigned short int i;
 
     if ((result = FT_Set_Pixel_Sizes(font->FTFace, FNT_CHAR_WIDTH, FNT_CHAR_HEIGHT)) == 0) {
+        unsigned short int i;
         font->Texture.width  = FNT_ATLAS_WIDTH;
         font->Texture.height = FNT_ATLAS_HEIGHT;
         font->Texture.psm    = GS_TEX_8;
@@ -283,7 +283,6 @@ void FontDeinit(void)
 
 static int AtlasInit(Font_t *font, struct FontAtlas *atlas)
 {
-    unsigned int TextureSizeEE, i;
     short int width_aligned, height_aligned;
     int result;
 
@@ -292,7 +291,7 @@ static int AtlasInit(Font_t *font, struct FontAtlas *atlas)
     height_aligned           = (font->Texture.height + 127) & ~127;
     font->Texture.vram_width = width_aligned / 64;
     if ((atlas->vram = GsVramAllocTextureBuffer(width_aligned, height_aligned, font->Texture.psm)) >= 0) {
-        TextureSizeEE = width_aligned * height_aligned;
+        unsigned int TextureSizeEE = width_aligned * height_aligned;
         if ((atlas->buffer = memalign(64, TextureSizeEE)) == NULL) {
             printf("Font: error - unable to allocate memory for atlas.\n");
             result = -ENOMEM;
@@ -403,9 +402,9 @@ static struct FontGlyphSlot *AtlasAlloc(Font_t *font, struct FontAtlas *atlas, s
 static void AtlasCopyFT(Font_t *font, struct FontAtlas *atlas, struct FontGlyphSlot *GlyphSlot, FT_GlyphSlot FT_GlyphSlot)
 {
     short int yOffset;
-    unsigned char *FTCharRow;
 
     for (yOffset = 0; yOffset < FT_GlyphSlot->bitmap.rows; yOffset++) {
+        unsigned char *FTCharRow;
         FTCharRow = (void *)UNCACHED_SEG(((unsigned int)atlas->buffer + GlyphSlot->VramPageX + (GlyphSlot->VramPageY + yOffset) * font->Texture.width));
         memcpy(FTCharRow, &((unsigned char *)FT_GlyphSlot->bitmap.buffer)[yOffset * FT_GlyphSlot->bitmap.width], FT_GlyphSlot->bitmap.width);
     }
@@ -488,12 +487,10 @@ static int DrawGlyph(struct UIDrawGlobal *gsGlobal, Font_t *font, wint_t charact
 {
     struct FontGlyphSlot *glyphSlot;
     struct FontGlyphSlotInfo glyphInfo;
-    struct FontAtlas *atlas;
-    unsigned short int i, slot;
-    short int XCoordinates, YCoordinates;
-    int result;
 
     if (font->IsLoaded) {
+        short int XCoordinates, YCoordinates;
+        int result;
         if ((result = GetGlyph(gsGlobal, font, character, DrawMissingGlyph, &glyphInfo)) != 0)
             return result;
 
@@ -566,7 +563,7 @@ void FontPrintf(struct UIDrawGlobal *gsGlobal, short int x, short int y, short i
 static int GetGlyphWidth(struct UIDrawGlobal *gsGlobal, Font_t *font, wint_t character, int DrawMissingGlyph)
 {
     struct FontGlyphSlotInfo glyphInfo;
-    int result;
+    int result = 0;
 
     if (font->IsLoaded) { // Calling FT_Get_Advance is slow when I/O is slow, hence a cache is required. Here, the atlas is used as a cache.
         if ((result = GetGlyph(gsGlobal, font, character, DrawMissingGlyph, &glyphInfo)) != 0)
@@ -575,16 +572,17 @@ static int GetGlyphWidth(struct UIDrawGlobal *gsGlobal, Font_t *font, wint_t cha
         return glyphInfo.slot->advance_x;
     }
 
-    return 0;
+    return result;
 }
 
 int FontGetGlyphWidth(struct UIDrawGlobal *gsGlobal, wint_t character)
 {
-    int width;
+    int width = 0;
 
     if ((width = GetGlyphWidth(gsGlobal, &GS_FTFont, character, 0)) == 0) {
         if ((width = GetGlyphWidth(gsGlobal, &GS_sub_FTFont, character, 0)) == 0) {
             width = GetGlyphWidth(gsGlobal, &GS_FTFont, character, 1);
         }
     }
+    return width;
 }
