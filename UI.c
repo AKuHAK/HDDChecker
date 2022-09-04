@@ -31,7 +31,7 @@ unsigned short int SelectButton, CancelButton;
 
 // static int language = LANGUAGE_ENGLISH;
 
-#include "lang.c"
+// #include "lang.c"
 
 static char *LangStringTable[SYS_UI_MSG_COUNT];
 static char *LangLblStringTable[SYS_UI_LBL_COUNT];
