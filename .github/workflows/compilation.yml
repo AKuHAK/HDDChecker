@@ -34,6 +34,19 @@ jobs:
           name: HDDChecker-${{ steps.slug.outputs.sha8 }}.zip
           path: HDDChecker-${{ steps.slug.outputs.sha8 }}.zip
 
+      - name: Compile HDDChecker without logging
+        run: |
+          make clean
+          make LOG_MESSAGES=0
+          zip HDDChecker_nolog-${{ steps.slug.outputs.sha8 }}.zip HDDChecker.elf lang/*
+
+      - name: Upload HDDChecker
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: HDDChecker_nolog-${{ steps.slug.outputs.sha8 }}.zip
+          path: HDDChecker_nolog-${{ steps.slug.outputs.sha8 }}.zip
+
       - name: Compile FSCK-tool
         run: |
           make clean
