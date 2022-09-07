@@ -587,4 +587,5 @@ int FontGetGlyphWidth(struct UIDrawGlobal *gsGlobal, wint_t character)
             width = GetGlyphWidth(gsGlobal, &GS_FTFont, character, 1);
         }
     }
+    return width;
 }

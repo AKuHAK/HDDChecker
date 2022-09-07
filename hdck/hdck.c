@@ -379,7 +379,7 @@ static void MarkUnreadablePartionAsEmpty(int device, u32 lba, u32 parent, u32 le
 {
     apa_cache_t *clink;
     u32 new_length;
-    int result, i;
+    int result;
 
     new_length = 0;
     clink      = apaCacheGetHeader(device, parent, 0, &result);
@@ -387,6 +387,7 @@ static void MarkUnreadablePartionAsEmpty(int device, u32 lba, u32 parent, u32 le
 
     if (clink != NULL) {
         while (length != 0) {
+            unsigned short int i;
             for (i = 31; i >= 0; i--) {
                 if ((new_length = 1 << i) & length)
                     break;

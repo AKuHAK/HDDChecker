@@ -1,4 +1,4 @@
-#include "lang.h"
+#include "lang.c"
 
 #define UI_OFFSET_X    8
 #define UI_OFFSET_Y    8

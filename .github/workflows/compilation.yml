@@ -29,7 +29,7 @@ jobs:
 
       - name: Upload HDDChecker
         if: ${{ success() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: HDDChecker-${{ steps.slug.outputs.sha8 }}.zip
           path: HDDChecker-${{ steps.slug.outputs.sha8 }}.zip

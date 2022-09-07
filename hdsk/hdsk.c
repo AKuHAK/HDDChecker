@@ -409,7 +409,7 @@ static int MovePartition(int device, apa_cache_t *dest, apa_cache_t *start)
 static int SplitEmptyPartition(int device, apa_cache_t *partition, u32 length)
 {
     apa_cache_t *clink, *empty;
-    int result;
+    int result = 0;
 
     printf("hdsk: split empty partition.\n");
 

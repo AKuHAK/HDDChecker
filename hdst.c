@@ -47,7 +47,7 @@ int InitATADevice(int unit)
     char DeviceName[8];
 
     memset(&AtadDeviceData[unit], 0, sizeof(AtadDeviceData[unit]));
-    sprintf(DeviceName, "hdst%u:", unit);
+    sprintf(DeviceName, "hdst%d:", unit);
     if ((result = fileXioDevctl(DeviceName, HDST_DEVCTL_DEVICE_PS2_DETECT, NULL, 0, &AtadDeviceData[unit].PS2AtadData, sizeof(AtadDeviceData[unit].PS2AtadData))) == 0) {
         if (AtadDeviceData[unit].PS2AtadData.exists) {
             if ((result = fileXioDevctl(DeviceName, HDST_DEVCTL_DEVICE_IDENTIFY, NULL, 0, AtadDeviceData[unit].IdentificationData, sizeof(AtadDeviceData[unit].IdentificationData))) == 0) {

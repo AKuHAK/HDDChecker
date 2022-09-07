@@ -8,7 +8,7 @@
 #include <fileXio_rpc.h>
 #include <atahw.h>
 #include <hdd-ioctl.h>
-#include <usbhdfsd-common.h>
+// #include <usbhdfsd-common.h>
 #include <sys/fcntl.h>
 
 #include <libgs.h>
@@ -233,7 +233,7 @@ int ScanDisk(int unit)
 {
     char ErrorPartName[64] = "hdd0:";
 
-    int result, InitSemaID;
+    int result = 0, InitSemaID;
 
     WaitSema(InstallLockSema);
 
@@ -650,7 +650,7 @@ int SurfScanDisk(int unit)
 
     InitProgressScreen(SYS_UI_LBL_SURF_SCANNING_DISK);
 
-    sprintf(DeviceName, "hdst%u:", unit);
+    sprintf(DeviceName, "hdst%d:", unit);
     result                = 0;
     TotalSectors          = GetATADeviceCapacity(unit);
     TimeElasped           = 0;
@@ -762,7 +762,7 @@ int ZeroFillDisk(int unit)
 
     InitProgressScreen(SYS_UI_LBL_ZERO_FILLING_DISK);
 
-    sprintf(DeviceName, "hdst%u:", unit);
+    sprintf(DeviceName, "hdst%d:", unit);
     result           = 0;
     TotalSectors     = GetATADeviceCapacity(unit);
     TimeElasped      = 0;
@@ -903,7 +903,7 @@ void poweroffCallback(void *arg)
 
 #ifndef FSCK
         // As required by some (typically 2.5") HDDs, issue the SCSI STOP UNIT command to avoid causing an emergency park.
-        fileXioDevctl("mass:", USBMASS_DEVCTL_STOP_ALL, NULL, 0, NULL, 0);
+        // fileXioDevctl("mass:", USBMASS_DEVCTL_STOP_ALL, NULL, 0, NULL, 0);
 #endif
 
         /* Power-off the PlayStation 2 console. */

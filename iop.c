@@ -28,11 +28,11 @@ extern unsigned int size_PADMAN_irx;
 extern unsigned char MCMAN_irx[];
 extern unsigned int size_MCMAN_irx;
 
-extern unsigned char USBD_irx[];
-extern unsigned int size_USBD_irx;
+// extern unsigned char USBD_irx[];
+// extern unsigned int size_USBD_irx;
 
-extern unsigned char USBHDFSD_irx[];
-extern unsigned int size_USBHDFSD_irx;
+// extern unsigned char USBHDFSD_irx[];
+// extern unsigned int size_USBHDFSD_irx;
 #endif
 
 extern unsigned char POWEROFF_irx[];
@@ -177,8 +177,8 @@ int IopInitStart(unsigned int flags)
 
 #ifndef FSCK
     SifExecModuleBuffer(MCMAN_irx, size_MCMAN_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(USBD_irx, size_USBD_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(USBHDFSD_irx, size_USBHDFSD_irx, 0, NULL, NULL);
+    // SifExecModuleBuffer(USBD_irx, size_USBD_irx, 0, NULL, NULL);
+    // SifExecModuleBuffer(USBHDFSD_irx, size_USBHDFSD_irx, 0, NULL, NULL);
 #endif
 
     SysCreateThread(SystemInitThread, SysInitThreadStack, SYSTEM_INIT_THREAD_STACK_SIZE, &InitThreadParams, 0x2);

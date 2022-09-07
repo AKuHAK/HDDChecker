@@ -21,7 +21,8 @@ ifeq ($(FSCK),1)
 	EE_CFLAGS += -DFSCK=1
 	EE_BIN = $(EE_FSCK_BIN)
 else
-	EE_IOP_OBJS += MCMAN_irx.o USBD_irx.o USBHDFSD_irx.o HDST_irx.o HDCK_irx.o HDSK_irx.o FSSK_irx.o
+	EE_IOP_OBJS += MCMAN_irx.o HDST_irx.o HDCK_irx.o HDSK_irx.o FSSK_irx.o
+#	E_IOP_OBJS +=  USBD_irx.o USBHDFSD_irx.o
 	EE_OBJS += hdst.o
 	EE_BIN = $(EE_HDDCHECKER_BIN)
 endif
@@ -78,11 +79,11 @@ MCMAN_irx.c: $(PS2SDK)/iop/irx/mcman.irx
 PADMAN_irx.c: $(PS2SDK)/iop/irx/freepad.irx
 	bin2c $(PS2SDK)/iop/irx/freepad.irx PADMAN_irx.c PADMAN_irx
 
-USBD_irx.c: $(PS2SDK)/iop/irx/usbd.irx
-	bin2c $(PS2SDK)/iop/irx/usbd.irx USBD_irx.c USBD_irx
+# USBD_irx.c: $(PS2SDK)/iop/irx/usbd.irx
+# 	bin2c $(PS2SDK)/iop/irx/usbd.irx USBD_irx.c USBD_irx
 
-USBHDFSD_irx.c: $(PS2SDK)/iop/irx/usbhdfsd.irx
-	bin2c $(PS2SDK)/iop/irx/usbhdfsd.irx USBHDFSD_irx.c USBHDFSD_irx
+# USBHDFSD_irx.c: $(PS2SDK)/iop/irx/usbhdfsd.irx
+# 	bin2c $(PS2SDK)/iop/irx/usbhdfsd.irx USBHDFSD_irx.c USBHDFSD_irx
 
 IOMANX_irx.c: $(PS2SDK)/iop/irx/iomanX.irx
 	bin2c $(PS2SDK)/iop/irx/iomanX.irx IOMANX_irx.c IOMANX_irx

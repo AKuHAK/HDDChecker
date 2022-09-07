@@ -31,7 +31,7 @@ unsigned short int SelectButton, CancelButton;
 
 static int language = LANGUAGE_ENGLISH;
 
-#include "lang.c"
+// #include "lang.c"
 
 static char *LangStringTable[SYS_UI_MSG_COUNT];
 static char *LangLblStringTable[SYS_UI_LBL_COUNT];
@@ -170,7 +170,7 @@ static int ParseLanguageFile(char **array, FILE *file, unsigned int ExpectedNumL
 
     if (result == 0) {
         if (LinesLoaded != ExpectedNumLines) {
-            printf("ParseLanguageFile: Mismatched number of lines (%u/%d)\n", LinesLoaded, ExpectedNumLines);
+            printf("ParseLanguageFile: Mismatched number of lines (%d/%u)\n", LinesLoaded, ExpectedNumLines);
             result = -1;
         }
     }
@@ -206,7 +206,7 @@ static int ParseFontListFile(char **array, FILE *file, unsigned int ExpectedNumL
 
     if (result == 0) {
         if (LinesLoaded != ExpectedNumLines) {
-            printf("ParseFontListFile: Mismatched number of lines (%u/%d)\n", LinesLoaded, ExpectedNumLines);
+            printf("ParseFontListFile: Mismatched number of lines (%d/%u)\n", LinesLoaded, ExpectedNumLines);
             result = -1;
         }
     }
@@ -221,7 +221,7 @@ static char *GetDefaultFontFilePath(void)
     char *result;
 
     if ((result = malloc(sizeof(DefaultFontFilename) + 6 + 2)) != NULL)
-        sprintf(result, "lang/%s", DefaultFontFilename);
+        sprintf(result, "%s", DefaultFontFilename);
 
     return result;
 }
@@ -235,7 +235,7 @@ static char *GetFontFilePath(unsigned int language)
     result = NULL;
     memset(FontFileArray, 0, sizeof(FontFileArray));
 
-    while ((file = fopen("lang/fonts.txt", "r")) == NULL) {
+    while ((file = fopen("fonts.txt", "r")) == NULL) {
         if (errno != ENODEV)
             break;
 
@@ -247,7 +247,7 @@ static char *GetFontFilePath(unsigned int language)
             pFontFilename = FontFileArray[language];
 
             if ((result = malloc(strlen(pFontFilename) + 6)) != NULL)
-                sprintf(result, "lang/%s", pFontFilename);
+                sprintf(result, "%s", pFontFilename);
         } else
             result = GetDefaultFontFilePath();
 
@@ -280,13 +280,13 @@ static int LoadLanguageStrings(unsigned int language)
     memset(LangStringTable, 0, sizeof(LangStringTable));
     memset(LangLblStringTable, 0, sizeof(LangLblStringTable));
 
-    sprintf(path, "lang/strings_%s.txt", LanguageShortForms[language]);
+    sprintf(path, "strings_%s.txt", LanguageShortForms[language]);
     if ((file = fopen(path, "r")) != NULL) {
         result = ParseLanguageFile(LangStringTable, file, SYS_UI_MSG_COUNT);
 
         fclose(file);
         if (result == 0) {
-            sprintf(path, "lang/labels_%s.txt", LanguageShortForms[language]);
+            sprintf(path, "labels_%s.txt", LanguageShortForms[language]);
             if ((file = fopen(path, "r")) != NULL) {
                 result = ParseLanguageFile(LangLblStringTable, file, SYS_UI_LBL_COUNT);
                 fclose(file);
@@ -548,7 +548,7 @@ int InitializeUI(int BufferFont)
         language = LANGUAGE_ENGLISH;
     memset(LangStringWrapTable, 0, sizeof(LangStringWrapTable));
 
-    DEBUG_PRINTF("InitializeUI: language is: %u\n", language);
+    DEBUG_PRINTF("InitializeUI: language is: %d\n", language);
 
     if (GetConsoleRegion() == CONSOLE_REGION_JAPAN) {
         SelectButton = PAD_CIRCLE;
@@ -561,11 +561,11 @@ int InitializeUI(int BufferFont)
     InitGraphics();
 
     while ((result = LoadLanguageStrings(language)) == -ENODEV) {
-        DEBUG_PRINTF("LoadLanguageStrings(%u): %d\n", language, result);
+        DEBUG_PRINTF("LoadLanguageStrings(%d): %d\n", language, result);
         WaitForDevice();
     }
 
-    DEBUG_PRINTF("LoadLanguageStrings(%u) result: %d\n", language, result);
+    DEBUG_PRINTF("LoadLanguageStrings(%d) result: %d\n", language, result);
     if (result != 0) {
         if ((result = LoadDefaultLanguageStrings()) != 0) {
             DEBUG_PRINTF("LoadDefaultLanguageStrings result: %d\n", result);
