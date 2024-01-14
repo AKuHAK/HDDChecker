@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
     ee_sema_t ThreadSema;
     int result, InitSemaID, BootDevice;
 
-    chdir("mass:/HDDChecker/");
+    DEBUG_PRINTF("chdir(\"mc0:/HDDC/\")\n");
+    chdir("mc0:/HDDC/");
     // chdir("hdd0:__system:pfs:/HDDChecker/");
     // chdir("hdd0:__system:pfs:/fsck/"); // For testing the standalone FSCK tool.
     if ((BootDevice = GetBootDeviceID()) == BOOT_DEVICE_UNKNOWN)

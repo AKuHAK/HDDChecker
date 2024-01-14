@@ -221,7 +221,7 @@ static char *GetDefaultFontFilePath(void)
     char *result;
 
     if ((result = malloc(sizeof(DefaultFontFilename) + 6 + 2)) != NULL)
-        sprintf(result, "lang/%s", DefaultFontFilename);
+        sprintf(result, "%s", DefaultFontFilename);
 
     return result;
 }
@@ -235,7 +235,7 @@ static char *GetFontFilePath(unsigned int language)
     result = NULL;
     memset(FontFileArray, 0, sizeof(FontFileArray));
 
-    while ((file = fopen("lang/fonts.txt", "r")) == NULL) {
+    while ((file = fopen("fonts.txt", "r")) == NULL) {
         if (errno != ENODEV)
             break;
 
@@ -247,7 +247,7 @@ static char *GetFontFilePath(unsigned int language)
             pFontFilename = FontFileArray[language];
 
             if ((result = malloc(strlen(pFontFilename) + 6)) != NULL)
-                sprintf(result, "lang/%s", pFontFilename);
+                sprintf(result, "%s", pFontFilename);
         } else
             result = GetDefaultFontFilePath();
 
@@ -266,7 +266,7 @@ static int LoadLanguageStrings(unsigned int language)
 {
     int result;
     FILE *file;
-    char path[20];
+    char path[64];
     static const char *LanguageShortForms[NUM_SUPPORTED_LANGUAGES] = {
         "JA",
         "EN",
@@ -280,13 +280,13 @@ static int LoadLanguageStrings(unsigned int language)
     memset(LangStringTable, 0, sizeof(LangStringTable));
     memset(LangLblStringTable, 0, sizeof(LangLblStringTable));
 
-    sprintf(path, "lang/strings_%s.txt", LanguageShortForms[language]);
+    sprintf(path, "strings_%s.txt", LanguageShortForms[language]);
     if ((file = fopen(path, "r")) != NULL) {
         result = ParseLanguageFile(LangStringTable, file, SYS_UI_MSG_COUNT);
 
         fclose(file);
         if (result == 0) {
-            sprintf(path, "lang/labels_%s.txt", LanguageShortForms[language]);
+            sprintf(path, "labels_%s.txt", LanguageShortForms[language]);
             if ((file = fopen(path, "r")) != NULL) {
                 result = ParseLanguageFile(LangLblStringTable, file, SYS_UI_LBL_COUNT);
                 fclose(file);

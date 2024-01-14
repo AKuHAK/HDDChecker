@@ -18,7 +18,7 @@
 #define MODNAME "HDD_status"
 IRX_ID(MODNAME, 1, 2);
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_PRINTF(args...) printf(args)
